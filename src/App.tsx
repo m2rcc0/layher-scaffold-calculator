@@ -1,39 +1,24 @@
 import React, { useState } from "react";
+import { calculateScaffold, PartRequirement } from "./calculateScaffold";
 import "./App.css";
-
-const LAYHER_STANDARD_LENGTH = 2.0; // meters
-
-function calculateMaterials(length: number, width: number, height: number) {
-  // Simple estimation logic for demo purposes
-  const bays = Math.ceil(length / LAYHER_STANDARD_LENGTH);
-  const rows = Math.ceil(width / LAYHER_STANDARD_LENGTH);
-  const lifts = Math.ceil(height / 2); // assuming 2m lift height
-
-  const standards = (bays + 1) * (rows + 1) * lifts;
-  const ledgers = bays * (rows + 1) * (lifts + 1);
-  const transoms = (rows + 1) * (bays + 1) * lifts;
-
-  return {
-    standards,
-    ledgers,
-    transoms,
-    lifts
-  };
-}
 
 function App() {
   const [length, setLength] = useState(8);
   const [width, setWidth] = useState(4);
   const [height, setHeight] = useState(6);
-  const [result, setResult] = useState<ReturnType<typeof calculateMaterials>>();
+  const [result, setResult] = useState<PartRequirement[]>();
 
   const handleCalculate = () => {
-    setResult(calculateMaterials(length, width, height));
+    setResult(calculateScaffold({ length, width, height }));
   };
+
+  const totalWeight = result?.reduce((sum, req) => sum + (req.part.weight_kg || 0) * req.count, 0) || 0;
 
   return (
     <div className="App">
       <h1>Layher Scaffold Calculator</h1>
+      <p>Calculate the required Layher scaffold components for your project</p>
+      
       <div>
         <label>
           Length (m):{" "}
@@ -71,15 +56,31 @@ function App() {
         </label>
       </div>
       <button onClick={handleCalculate}>Calculate</button>
+      
       {result && (
         <div className="result">
-          <h2>Estimated Materials</h2>
-          <ul>
-            <li>Standards: {result.standards}</li>
-            <li>Ledgers: {result.ledgers}</li>
-            <li>Transoms: {result.transoms}</li>
-            <li>Lifts: {result.lifts}</li>
-          </ul>
+          <h2>Required Layher Components</h2>
+          <div className="parts-list">
+            {result.map((req, index) => (
+              <div key={index} className="part-item">
+                <div className="part-info">
+                  <strong>{req.part.name}</strong>
+                  <span className="part-number">({req.part.partNumber})</span>
+                </div>
+                <div className="part-details">
+                  <span className="quantity">Qty: {req.count}</span>
+                  {req.part.weight_kg && (
+                    <span className="weight">
+                      Weight: {(req.part.weight_kg * req.count).toFixed(1)} kg
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="summary">
+            <strong>Total Weight: {totalWeight.toFixed(1)} kg</strong>
+          </div>
         </div>
       )}
     </div>
