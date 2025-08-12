@@ -3,13 +3,16 @@ import { calculateScaffold, PartRequirement } from "./calculateScaffold";
 import "./App.css";
 
 function App() {
-  const [length, setLength] = useState(8);
-  const [width, setWidth] = useState(4);
-  const [height, setHeight] = useState(6);
+  const [length, setLength] = useState<number | "">(8);
+  const [width, setWidth] = useState<number | "">(4);
+  const [height, setHeight] = useState<number | "">(6);
   const [result, setResult] = useState<PartRequirement[]>();
 
   const handleCalculate = () => {
-    setResult(calculateScaffold({ length, width, height }));
+    // Only calculate if all values are numbers
+    if (typeof length === 'number' && typeof width === 'number' && typeof height === 'number') {
+      setResult(calculateScaffold({ length, width, height }));
+    }
   };
 
   const totalWeight = result?.reduce((sum, req) => sum + (req.part.weight_kg || 0) * req.count, 0) || 0;
@@ -27,7 +30,7 @@ function App() {
             value={length}
             min={2}
             step={0.5}
-            onChange={e => setLength(Number(e.target.value))}
+            onChange={e => setLength(e.target.value === "" ? "" : Number(e.target.value))}
           />
         </label>
       </div>
@@ -39,7 +42,7 @@ function App() {
             value={width}
             min={2}
             step={0.5}
-            onChange={e => setWidth(Number(e.target.value))}
+            onChange={e => setWidth(e.target.value === "" ? "" : Number(e.target.value))}
           />
         </label>
       </div>
@@ -51,11 +54,16 @@ function App() {
             value={height}
             min={2}
             step={0.5}
-            onChange={e => setHeight(Number(e.target.value))}
+            onChange={e => setHeight(e.target.value === "" ? "" : Number(e.target.value))}
           />
         </label>
       </div>
-      <button onClick={handleCalculate}>Calculate</button>
+      <button 
+        onClick={handleCalculate}
+        disabled={typeof length !== 'number' || typeof width !== 'number' || typeof height !== 'number'}
+      >
+        Calculate
+      </button>
       
       {result && (
         <div className="result">

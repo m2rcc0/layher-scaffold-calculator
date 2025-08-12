@@ -52,6 +52,15 @@
   background: #1d4ed8;
 }
 
+.App button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.App button:disabled:hover {
+  background: #9ca3af;
+}
+
 .result {
   margin-top: 2rem;
   background: white;
